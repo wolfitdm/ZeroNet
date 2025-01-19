@@ -76,6 +76,7 @@ class SiteManagerPlugin(object):
         if not os.path.isfile(self.cache_file_path):
            zero_cache = {
               "domains": {},
+              "content_json_addresses": {},
               "content_json_domains": {},
               "update_interval": 3600 * 5, # 5 hours is really enough and not too much, real dns resolvers need 24 hours by the way >.<
               "last_updated": 0,
@@ -262,7 +263,7 @@ class SiteManagerPlugin(object):
         log.debug("is domain " + address)
         isDomainZite = super(SiteManagerPlugin, self).isDomain(address)
         if not isDomainZite:
-           if self.zero_cache["content_json_domains"].get(address):
+           if self.zero_cache["content_json_addresses"].get(address):
               return isDomainZite
            has_sites = "sites" in super(SiteManagerPlugin, self).__dict__
            if not has_sites:
@@ -284,9 +285,11 @@ class SiteManagerPlugin(object):
            
            if not self.zero_cache["content_json_domains"].get(domain):
               nd = {}
-              nd[domain] = address   
-              nd[address] = domain   
+              nd[domain] = address  
+              na = {}             
+              na[address] = domain   
               self.zero_cache["content_json_domains"].update(nd)
+              self.zero_cache["content_json_addresses"].update(na)
               self.zero_content_json_domains = self.zero_cache["content_json_domains"]
               self.zero_cache["last_updated"] = 0
               
