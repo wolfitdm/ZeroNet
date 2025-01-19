@@ -58,16 +58,9 @@ class UiWebsocketPlugin(object):
             assert SafeRe.isSafePattern(filter)
             filter_re = re.compile(".*" + filter)
 
-        last_match = False
         for line in log_file:
-            if not line.startswith("[") and last_match:  # Multi-line log entry
-                lines.append(line.replace(" ", "&nbsp;"))
-                continue
-
             if filter and not filter_re.match(line):
-                last_match = False
                 continue
-            last_match = True
             lines.append(line)
 
         num_found = len(lines)

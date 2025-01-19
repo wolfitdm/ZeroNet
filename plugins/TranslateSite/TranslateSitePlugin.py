@@ -25,8 +25,6 @@ class UiRequestPlugin(object):
             file_generator = super(UiRequestPlugin, self).actionSiteMedia(path, **kwargs)
             if "__next__" in dir(file_generator):  # File found and generator returned
                 site = self.server.sites.get(path_parts["address"])
-                if not site or not site.content_manager.contents.get("content.json"):
-                    return file_generator
                 return self.actionPatchFile(site, path_parts["inner_path"], file_generator)
             else:
                 return file_generator
@@ -46,7 +44,7 @@ class UiRequestPlugin(object):
             return file_generator
 
     def actionPatchFile(self, site, inner_path, file_generator):
-        content_json = site.content_manager.contents.get("content.json")
+        content_json = site.content_manager.contents["content.json"]
         lang_file = "languages/%s.json" % translate.lang
         lang_file_exist = False
         if site.settings.get("own"):  # My site, check if the file is exist (allow to add new lang without signing)

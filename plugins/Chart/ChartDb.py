@@ -48,15 +48,15 @@ class ChartDb(Db):
 
     def getTypeId(self, name):
         if name not in self.types:
-            res = self.execute("INSERT INTO type ?", {"name": name})
-            self.types[name] = res.lastrowid
+            self.execute("INSERT INTO type ?", {"name": name})
+            self.types[name] = self.cur.cursor.lastrowid
 
         return self.types[name]
 
     def getSiteId(self, address):
         if address not in self.sites:
-            res = self.execute("INSERT INTO site ?", {"address": address})
-            self.sites[address] = res.lastrowid
+            self.execute("INSERT INTO site ?", {"address": address})
+            self.sites[address] = self.cur.cursor.lastrowid
 
         return self.sites[address]
 

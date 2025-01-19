@@ -32,14 +32,17 @@ class ActionsPlugin(object):
         )
         self.icon = icon
 
-        self.console = False
+        if not config.debug:  # Hide console if not in debug mode
+            notificationicon.hideConsole()
+            self.console = False
+        else:
+            self.console = True
 
         @atexit.register
         def hideIcon():
-            try:
-                icon.die()
-            except Exception as err:
-                print("Error removing trayicon: %s" % err)
+            if not config.debug:
+                notificationicon.showConsole()
+            icon.die()
 
         ui_ip = config.ui_ip if config.ui_ip != "*" else "127.0.0.1"
 
@@ -132,30 +135,25 @@ class ActionsPlugin(object):
         else:
             cwd = os.path.dirname(sys.executable)
 
-        ignored_args = [
-            "--open_browser", "default_browser",
-            "--dist_type", "bundle_win64"
-        ]
-
         if sys.platform == 'win32':
-            args = ['"%s"' % arg for arg in args if arg and arg not in ignored_args]
+            args = ['"%s"' % arg for arg in args if arg]
         cmd = " ".join(args)
 
         # Dont open browser on autorun
-        cmd = cmd.replace("start.py", "zeronet.py").strip()
+        cmd = cmd.replace("start.py", "zeronet.py").replace('"--open_browser"', "").replace('"default_browser"', "").strip()
         cmd += ' --open_browser ""'
 
-        return "\r\n".join([
-            '@echo off',
-            'chcp 65001 > nul',
-            'set PYTHONIOENCODING=utf-8',
-            'cd /D \"%s\"' % cwd,
-            'start "" %s' % cmd
-        ])
+        return """
+            @echo off
+            chcp 65001 > nul
+            set PYTHONIOENCODING=utf-8
+            cd /D \"%s\"
+            start "" %s
+        """ % (cwd, cmd)
 
     def isAutorunEnabled(self):
         path = self.getAutorunPath()
-        return os.path.isfile(path) and open(path, "rb").read().decode("utf8") == self.formatAutorun()
+        return os.path.isfile(path) and open(path).read() == self.formatAutorun()
 
     def titleAutorun(self):
         translate = _["Start ZeroNet when Windows starts"]
@@ -168,4 +166,4 @@ class ActionsPlugin(object):
         if self.isAutorunEnabled():
             os.unlink(self.getAutorunPath())
         else:
-            open(self.getAutorunPath(), "wb").write(self.formatAutorun().encode("utf8"))
+            open(self.getAutorunPath(), "w").write(self.formatAutorun())

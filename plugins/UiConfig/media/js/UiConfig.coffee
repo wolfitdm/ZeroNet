@@ -57,8 +57,9 @@ class UiConfig extends ZeroFrame
 		for item, i in changed_values
 			last = i == changed_values.length - 1
 			value = @config_storage.deformatValue(item.value, typeof(@config[item.key].default))
-			default_value = @config_storage.deformatValue(@config[item.key].default, typeof(@config[item.key].default))
-			value_same_as_default = JSON.stringify(default_value) == JSON.stringify(value)
+			value_same_as_default = JSON.stringify(@config[item.key].default) == JSON.stringify(value)
+			if value_same_as_default
+				value = null
 
 			if @config[item.key].item.valid_pattern and not @config[item.key].item.isHidden?()
 				match = value.match(@config[item.key].item.valid_pattern)
@@ -67,9 +68,6 @@ class UiConfig extends ZeroFrame
 					Page.cmd("wrapperNotification", ["error", message])
 					cb(false)
 					break
-
-			if value_same_as_default
-				value = null
 
 			@saveValue(item.key, value, if last then cb else null)
 

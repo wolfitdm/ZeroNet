@@ -3,7 +3,7 @@ import urllib.request
 import struct
 import socket
 
-import lib.bencode_open as bencode_open
+import bencode
 from lib.subtl.subtl import UdpTrackerClient
 import socks
 import sockshandler
@@ -133,7 +133,9 @@ class SiteAnnouncerPlugin(object):
 
         # Decode peers
         try:
-            peer_data = bencode_open.loads(response)[b"peers"]
+            peer_data = bencode.decode(response)["peers"]
+            if type(peer_data) is not bytes:
+                peer_data = peer_data.encode()
             response = None
             peer_count = int(len(peer_data) / 6)
             peers = []
