@@ -30,6 +30,7 @@ class SiteManagerPlugin(object):
         self.acr = re.compile("^[A-Za-z0-9]{26,35}$")
         self.my_db_domains = {}
         self.zero_db_domains = {}
+        self.zero_content_json_domains = {}
         self.load_cache()
 
     def loadZeroNameCachedPlugin(self, *args, **kwargs):
@@ -75,6 +76,7 @@ class SiteManagerPlugin(object):
         if not os.path.isfile(self.cache_file_path):
            zero_cache = {
               "domains": {},
+              "content_json_domains": {},
               "update_interval": 3600 * 5, # 5 hours is really enough and not too much, real dns resolvers need 24 hours by the way >.<
               "last_updated": 0,
               "update_time": 0,
@@ -88,6 +90,17 @@ class SiteManagerPlugin(object):
         with open(self.cache_file_path, 'r') as f: 
              self.zero_cache = json.load(f)
 
+    def update_cache_content_json(self):
+        self.load_cache()
+        if not self.cache_need_update():
+           return
+        
+        content_json_domains = self.filter_domains(self.zero_cache["content_json_domains"])
+        self.zero_cache["content_json_domains"] = content_json_domains
+        self.zero_content_json_domains = self.zero_cache["content_json_domains"]
+        self.zero_cache["last_updated"] = time.time()
+        self.update_cache_file()
+        
     def update_cache(self):
         self.load_cache()
         if not self.cache_need_update():
@@ -97,8 +110,13 @@ class SiteManagerPlugin(object):
         for i in range(0, zero_names_len):
             self.loadZeroName(i)
             self.update_cache_resolver(i)
-            
+        
+        content_json_domains = self.filter_domains(self.zero_cache["content_json_domains"])
+        
         self.zero_db_domains = self.zero_cache["domains"]
+        self.zero_content_json_domains = self.zero_cache["content_json_domains"]
+        self.zero_cache["content_json_domains"] = content_json_domains
+        self.zero_cache["last_updated"] = time.time()
         self.update_cache_file()
 
     def update_cache_resolver(self, i):
@@ -228,6 +246,7 @@ class SiteManagerPlugin(object):
                  log.debug("my_db_domains is None")
                  return resolve
               new_domains = {}
+              new_domains.update(self.zero_content_json_domains)
               new_domains.update(self.zero_db_domains)
               new_domains.update(my_db_domains)
               self.my_db_domains = my_db_domains
@@ -241,7 +260,35 @@ class SiteManagerPlugin(object):
     # Return: True if the address is domain
     def isDomain(self, address):
         log.debug("is domain " + address)
-        return super(SiteManagerPlugin, self).isDomain(address)
+        isDomainZite = super(SiteManagerPlugin, self).isDomain(address)
+        if not isDomainZite:
+           has_sites = "sites" in super(SiteManagerPlugin, self).__dict__
+           if not has_sites:
+              return isDomainZite
+           
+           sites = super(SiteManagerPlugin, self).__dict__["sites"]
+           
+           site = sites.get(address)
+           if not site:
+              return isDomainZite
+           
+           contentJson = site.content_manager.contents.get("content.json")
+           if not contentJson:
+              return isDomainZite
+           
+           domain = contentJson.get("domain")
+           if not domain:
+              return isDomainZite
+           
+           if not self.zero_cache["content_json_domains"].get(domain):
+              nd = {}
+              nd[domain] = address   
+              self.zero_cache["content_json_domains"].update(nd)
+              self.zero_content_json_domains = self.zero_cache["content_json_domains"]
+              self.zero_cache["last_updated"] = 0
+              
+        return isDomainZite 
+       
 
 @PluginManager.registerTo("ConfigPlugin")
 class ConfigPlugin(object):
