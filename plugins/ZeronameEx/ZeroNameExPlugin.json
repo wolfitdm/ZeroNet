@@ -1,5 +1,8 @@
 {
   "content_json_domains": {
+    "1BLogC9LN4oPDcruNz3qo1ysa133E9AGg8": "Blog.ZeroNetwork.bit",
+    "1SitesVCdgNfHojzf2aGKQrD4dteAZR1k": "Sites.ZeroNetX.bit",
+    "1TaLkFrMwvbNsooF4ioKAY9EuxTBTjipT": "Talk.ZeroNetwork.bit",
     "Blog.ZeroNetwork.bit": "1BLogC9LN4oPDcruNz3qo1ysa133E9AGg8",
     "Sites.ZeroNetX.bit": "1SitesVCdgNfHojzf2aGKQrD4dteAZR1k",
     "Talk.ZeroNetwork.bit": "1TaLkFrMwvbNsooF4ioKAY9EuxTBTjipT"
@@ -7568,7 +7571,7 @@
     "zzzzzz.bit": "1sLeEPyEnHgdnG1gDyo7QtEWbE7QuUb2B",
     "zzzzzzz.bit": "1sLeEPyEnHgdnG1gDyo7QtEWbE7QuUb2B"
   },
-  "last_updated": 1737305158.0480409,
+  "last_updated": 1737306077.5186262,
   "main_resolver": "1Name2NXVi1RDPDgf5617UoW7xA6YrhM9F",
   "resolvers": [
     "1Name2NXVi1RDPDgf5617UoW7xA6YrhM9F",

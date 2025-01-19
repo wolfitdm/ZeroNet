@@ -262,6 +262,8 @@ class SiteManagerPlugin(object):
         log.debug("is domain " + address)
         isDomainZite = super(SiteManagerPlugin, self).isDomain(address)
         if not isDomainZite:
+           if self.zero_cache["content_json_domains"].get(address):
+              return isDomainZite
            has_sites = "sites" in super(SiteManagerPlugin, self).__dict__
            if not has_sites:
               return isDomainZite
@@ -283,6 +285,7 @@ class SiteManagerPlugin(object):
            if not self.zero_cache["content_json_domains"].get(domain):
               nd = {}
               nd[domain] = address   
+              nd[address] = domain   
               self.zero_cache["content_json_domains"].update(nd)
               self.zero_content_json_domains = self.zero_cache["content_json_domains"]
               self.zero_cache["last_updated"] = 0
